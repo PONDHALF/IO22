@@ -6,3 +6,4 @@ Features:
 - DamageIndicators
 - Simple OnGround Items Stacking
 - Teleport Paper
+- Waypoint onDeath (Broadcast message position before death) 
