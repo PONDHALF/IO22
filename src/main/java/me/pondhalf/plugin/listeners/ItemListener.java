@@ -333,44 +333,78 @@ public class ItemListener implements Listener {
 //    }
 
     // Reference from UltimateStacker v2.1.7
+    // This isn't works for me :{
+//    public void updateInventory(Item item, Inventory inventory) {
+//        // Get amount from data items
+//        int amount = data.get(item.getUniqueId());
+//        // Get itemStack
+//        ItemStack itemStack = item.getItemStack();
+//
+//        // while amount greater than 0
+//        while (amount > 0) {
+//
+//            // ### Example int amount = 128; :: Mean amount of items on ground = 128  ###
+//
+//            int subtract = Math.min(amount, 512);
+//            // now int subtract = 128;
+//            amount -= subtract; // amount = 128(amount) - 128(subtract)
+//
+//            // now int amount = 0;
+//
+//            ItemStack newItem = itemStack.clone(); // Get clone item from (clone from pick up item);
+//            newItem.setAmount(subtract); // Set amount of item clone to .... (now int subtract = 128;)
+//
+//            // Store amount of items(from newItem) pick up
+//            Map<Integer, ItemStack> result = inventory.addItem(newItem);
+//
+//            // Example:
+//            //
+//            // Now amount of newItem is equals 128
+//            // If player pick up (newItem) amount 64 items
+//            // So variable result equals Map.put(64, newItem) and (give player items) inventory.addItem(newItem) give items to player at the same time;
+//            //
+//
+//            // if player can't pick up (mean amount of items pickup equals 0)
+//            if (result.get(0) != null) {
+//                // Now int amount = 0; right?
+//                amount += result.get(0).getAmount(); // mean get amount of items can't pick up cuz inventory full or something
+//                // So when update, Now int amount = amount of items can't pick up;
+//                // In example: now int amount = 128(amount of items on ground) - 64(amount of items player pickup)
+//                break;
+//            }
+//        }
+//
+//        if (amount <= 0) {
+//            // Remove items from data;
+//            data.remove(item.getUniqueId());
+//            // Kill entity (item)
+//            item.remove();
+//        } else {
+//            // Update amount of items onGround
+//            updateItemAmount(item, amount);
+//
+//        }
+//
+//    }
+
+    // FIXED Over stacking picked up items
+    // ( Fixed by ThatOneRR, He is a genius =} )
+    // check it out: https://www.youtube.com/channel/UC51zMndc4X06yuXGWQk6GPA
     public void updateInventory(Item item, Inventory inventory) {
-        // Get amount from data items
         int amount = data.get(item.getUniqueId());
-        // Get itemStack
         ItemStack itemStack = item.getItemStack();
 
-        // while amount greater than 0
+        ItemStack oneItem = new ItemStack(itemStack.getType(), 1);
+        // Putting them outside the while loop for re-usability, so I don't create a new variable every loop
+        Map<Integer, ItemStack> leftovers;
+
         while (amount > 0) {
+            // Add item (1 each loop). Let Minecraft handle the item stacking =D
+            leftovers = inventory.addItem(oneItem);
 
-            // ### Example int amount = 128; :: Mean amount of items on ground = 128  ###
+            if (!leftovers.isEmpty()) break;
 
-            int subtract = Math.min(amount, 512);
-            // now int subtract = 128;
-            amount -= subtract; // amount = 128(amount) - 128(subtract)
-
-            // now int amount = 0;
-
-            ItemStack newItem = itemStack.clone(); // Get clone item from (clone from pick up item);
-            newItem.setAmount(subtract); // Set amount of item clone to .... (now int subtract = 128;)
-
-            // Store amount of items(from newItem) pick up
-            Map<Integer, ItemStack> result = inventory.addItem(newItem);
-
-            // Example:
-            //
-            // Now amount of newItem is equals 128
-            // If player pick up (newItem) amount 64 items
-            // So variable result equals Map.put(64, newItem) and (give player items) inventory.addItem(newItem) give items to player at the same time;
-            //
-
-            // if player can't pick up (mean amount of items pickup equals 0)
-            if (result.get(0) != null) {
-                // Now int amount = 0; right?
-                amount += result.get(0).getAmount(); // mean get amount of items can't pick up cuz inventory full or something
-                // So when update, Now int amount = amount of items can't pick up;
-                // In example: now int amount = 128(amount of items on ground) - 64(amount of items player pickup)
-                break;
-            }
+            amount --;
         }
 
         if (amount <= 0) {
@@ -381,7 +415,6 @@ public class ItemListener implements Listener {
         } else {
             // Update amount of items onGround
             updateItemAmount(item, amount);
-
         }
 
     }
@@ -402,7 +435,9 @@ public class ItemListener implements Listener {
 
         String name = color("&6" + amount + "&6x" + " " + "&7" + getItemName(item));
 
-        item.setItemStack(itemStack); // no clue
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemStack.setItemMeta(itemMeta);
+        // item.setItemStack(itemStack); // no clue
 
         item.setCustomName(name); // Set CustomName
 
