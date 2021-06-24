@@ -401,9 +401,9 @@ public class ItemListener implements Listener {
         while (amount > 0) {
             // Add item (1 each loop). Let Minecraft handle the item stacking =D
             leftovers = inventory.addItem(oneItem);
-
+            // If there are leftovers, it means the inventory is full! Stop adding items :O
             if (!leftovers.isEmpty()) break;
-
+            // If not, it means 1 item is added successfully! Let's count the amount down and let the loop run again
             amount --;
         }
 
