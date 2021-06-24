@@ -47,6 +47,7 @@ public class ItemListener implements Listener {
     public void onEntityPickup(EntityPickupItemEvent event) {
         Item item = event.getItem();
         ItemStack itemStack = item.getItemStack();
+
         int amount = data.get(item.getUniqueId());
 
         if (event.getEntity() instanceof Player) {
@@ -55,7 +56,8 @@ public class ItemListener implements Listener {
             event.setCancelled(true);
             Player player = (Player) event.getEntity();
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, .2f, (float) (1 + Math.random()));
-            updateInventory(event.getItem(), player.getInventory());
+
+            updateInventory(item, player.getInventory());
 
         } else {
 
@@ -154,6 +156,7 @@ public class ItemListener implements Listener {
 //        }
     }
 
+    // On using Dropper
     @EventHandler
     public void onInventoryPickup(InventoryPickupItemEvent event) {
         event.setCancelled(true); // Cancel when pick items
@@ -252,7 +255,6 @@ public class ItemListener implements Listener {
                         if ((size + ItemEntitySize) <= 512) {
                             // Math Calculate Size
                             size += ItemEntitySize;
-
                             // Remove Data item_entity
                             data.remove(item_entity.getUniqueId());
                             // Remove item_entity
@@ -267,7 +269,7 @@ public class ItemListener implements Listener {
             }
 
         }
-        // Break vanilla Limit Item stack (vanilla stack max: 127)
+        // Break vanilla Limit Item stack (vanilla item drop stack max: 127)
         if (size < 32) {
             item.getItemStack().setAmount(size);
         } else {
@@ -302,28 +304,31 @@ public class ItemListener implements Listener {
     }
 
     // Check Player is full inventory : ?
-    public boolean hasAvaliableSlot(Player player){
-        Inventory inv = player.getInventory();
-        for (ItemStack item : inv.getContents()) {
-            if (item == null) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    public boolean hasAvaliableSlot(Player player){
+//        Inventory inv = player.getInventory();
+//        for (ItemStack item : inv.getContents()) {
+//            if (item == null) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     // Reference from UltimateStacker v2.1.7
     public void updateInventory(Item item, Inventory inventory) {
+        // Get amount from data items
         int amount = data.get(item.getUniqueId());
+        // Get itemStack
         ItemStack itemStack = item.getItemStack();
 
+        // while amount greater than 0
         while (amount > 0) {
 
             int subtract = Math.min(amount, 512);
             amount -= subtract;
             ItemStack newItem = itemStack.clone();
             newItem.setAmount(subtract);
-// fuck hard!!!!!!!!!!
+
             Map<Integer, ItemStack> result = inventory.addItem(newItem);
 
             if (result.get(0) != null) {
@@ -333,10 +338,14 @@ public class ItemListener implements Listener {
         }
 
         if (amount <= 0) {
+            // Remove items from data;
             data.remove(item.getUniqueId());
+            // Kill entity (item)
             item.remove();
         } else {
+            // Update amount of items onGround
             updateItemAmount(item, amount);
+
         }
 
     }
