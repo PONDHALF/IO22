@@ -1,4 +1,5 @@
 # IO22 Plugin 
+Simple Items Stacking
 
 Using Spigot version 1.17
 
