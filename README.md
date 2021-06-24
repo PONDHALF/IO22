@@ -1,5 +1,7 @@
-# IO22 PLUGIN
+# IO22 Plugin 
 
-Features
+Using Spigot version 1.17
+
+Features:
 - DamageIndicators
 - Simple OnGround Items Stacking
