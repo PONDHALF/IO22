@@ -1,0 +1,365 @@
+package me.pondhalf.plugin.listeners;
+
+import me.pondhalf.plugin.IO22;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.ItemMergeEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static me.pondhalf.plugin.utils.color;
+import static me.pondhalf.plugin.utils.decolor;
+
+public class ItemListener implements Listener {
+// *******##### So Hard!!! Started 22/6/2564 Time: 20:24 #####*******
+    private IO22 plugin;
+
+    private HashMap<UUID, Integer> data;
+
+    public ItemListener(IO22 plugin) {
+        this.plugin = plugin;
+        this.data = plugin.data;
+    }
+
+
+    @EventHandler
+    public void onItemMerge(ItemMergeEvent event) {
+        event.setCancelled(true);
+    }
+
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityPickup(EntityPickupItemEvent event) {
+        Item item = event.getItem();
+        ItemStack itemStack = item.getItemStack();
+        int amount = data.get(item.getUniqueId());
+
+        if (event.getEntity() instanceof Player) {
+
+            // if (amount < (512 / 2)) return;
+            event.setCancelled(true);
+            Player player = (Player) event.getEntity();
+            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, .2f, (float) (1 + Math.random()));
+            updateInventory(event.getItem(), player.getInventory());
+
+        } else {
+
+            updateItemMeta(item, itemStack, amount - 1);
+
+        }
+
+        // ###############
+//        Item item = event.getItem();
+//
+//        if (event.getEntity() instanceof Player) {
+//
+//            event.setCancelled(true);
+//            Player player = (Player) event.getEntity();
+//
+//            if (data.containsKey(item.getUniqueId())) {
+//
+//                ItemStack itemStack = item.getItemStack();
+//
+//                int amount = data.get(item.getUniqueId());
+//
+//                int subtract = Math.min(amount, 512);
+//
+//                while (amount > 0) {
+//
+//                    itemStack.setAmount(1);
+//
+//                    if (amount <= 0) {
+//
+//                        data.remove(item.getUniqueId());
+//                        item.remove();
+//
+//                    } else {
+//
+//                        amount -= subtract;
+//
+//                        HashMap<Integer, ItemStack> result = player.getInventory().addItem(itemStack);
+//
+//                        if (result.get(0) != null) {
+//
+//                            amount += result.get(0).getAmount();
+//                            break;
+//
+//                        }
+//
+//                        updateItemAmount(item, data.get(item.getUniqueId()));
+//                    }
+//
+//                }
+//
+//                player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, .2f, (float) (1 + (Math.random())));
+//
+//            }
+//
+//        }
+//        ######################################
+
+//        event.setCancelled(true);
+//
+//        if (event.getEntity() instanceof Player) {
+//
+//            Player player = (Player) event.getEntity();
+//
+//            Item item = event.getItem();
+//
+//            ItemStack getitem = item.getItemStack();
+//            getitem.setAmount(1);
+//
+//            if (data.containsKey(item.getUniqueId())) {
+//
+//                int size = data.get(item.getUniqueId());
+//
+//                for (int i = size; i >= 0; i--) {
+//
+//                    if (data.get(item.getUniqueId()) <= 0 || i <= 0) {
+//
+//                        data.remove(item.getUniqueId());
+//                        item.remove();
+//                        break;
+//                    } else {
+//
+//                        updateItemAmount(item, size-1);
+//                        player.getInventory().addItem(getitem);
+//
+//                    }
+//
+//                }
+//
+//                player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 0.8f);
+//
+//            } else {
+//
+//                event.setCancelled(false);
+//
+//            }
+//        }
+    }
+
+    @EventHandler
+    public void onInventoryPickup(InventoryPickupItemEvent event) {
+        event.setCancelled(true); // Cancel when pick items
+
+        updateInventory(event.getItem(), event.getInventory());
+    }
+
+    // ##### NOT WORK (for this event) ####
+    /*@EventHandler
+    public void onItemPickup(PlayerPickupItemEvent event) {
+        event.setCancelled(true); // Cancel when pick items
+        Item item = event.getItem(); // Get item pick up
+        Player player = event.getPlayer(); // Get who pick up
+        ItemStack getitem = item.getItemStack();
+        getitem.setAmount(1);
+        // ############# Old Idea (Bug: Items isn't split) ##############
+        /*if (data.containsKey(item.getUniqueId())) { // if item's uuid is in data
+            ItemStack getitem = item.getItemStack(); // Get ItemStack class from item pickup
+            getitem.setAmount(data.get(item.getUniqueId())); // Set amount item pickup (amount from data)
+            player.getInventory().addItem(getitem); // Get addItemStack to inventory of player
+            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP,1,1); // Add some a bit gimmick (Sound effect on pickup)_
+            item.remove(); // Remove item pickup on ground (cuz: this event will cancel when pick up)
+        }*/
+
+        // ######## FIXED Items isn't split #########
+        // ######## BUG created InventoryFull Bug
+        /* if (data.containsKey(item.getUniqueId())) {
+            int size = data.get(item.getUniqueId());
+            for (int i = size; i >= 0; i--) {
+                if (hasAvaliableSlot(player) == false) {
+                    event.setCancelled(true);
+                    break;
+                }
+
+                if (i == 0) {
+
+                    data.remove(item.getUniqueId());
+                    item.remove();
+
+                } else {
+
+                    player.getInventory().addItem(getitem);
+
+                    data.put(item.getUniqueId(), i);
+
+                }
+
+            }
+            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP,1f,0.8f);
+        } else {
+            event.setCancelled(false);
+        } */
+
+
+    @EventHandler
+    public void onItemSpawn(ItemSpawnEvent event) {
+        // Get (Entity) Item
+        Item item = event.getEntity();
+        // Get NearbyEntities from ItemSpawn
+        List<Entity> ents = item.getNearbyEntities(5,5,5);
+
+        // If Item isn't have Data
+        if (!data.containsKey(item.getUniqueId())) {
+            data.put(item.getUniqueId(), item.getItemStack().getAmount());
+        }
+
+        // Get Size of item from Data
+        int size = data.get(item.getUniqueId());
+
+        // -------- Debug Section --------
+        /*Bukkit.broadcastMessage(" ");
+        Bukkit.broadcastMessage("UUID: " + item.getUniqueId());
+        Bukkit.broadcastMessage("Amount: " + data.get(item.getUniqueId()));
+        Bukkit.broadcastMessage("Size: " + size);
+        Bukkit.broadcastMessage(" "); */
+        // -------- End Debug Section --------
+
+        // Loop get Entity from NearbyEntities
+        for (Entity ent : ents) {
+            // If loop entity item type equals item spawn type
+            if ((ent instanceof Item) && ((Item) ent).getItemStack().getType() == event.getEntity().getItemStack().getType()) {
+                // Item entity = (Item) ent // Get item from entity
+                Item item_entity = (Item) ent;
+
+                // If Item entity isn't Dead (Item is Valid)
+                if (!item_entity.isDead() && item_entity.isValid()) {
+                    ItemStack itemStack = item.getItemStack();
+                    ItemStack itemStack_ent = item_entity.getItemStack();
+
+                    // Check ItemMetaData
+                    if (itemStack.isSimilar(itemStack_ent)
+                    || itemStack.getItemMeta().getItemFlags() == itemStack_ent.getItemMeta().getItemFlags()) {
+                        // Get item_entity size
+                        int ItemEntitySize = data.get(item_entity.getUniqueId());
+                        // If item_entity <= 512
+                        if ((size + ItemEntitySize) <= 512) {
+                            // Math Calculate Size
+                            size += ItemEntitySize;
+
+                            // Remove Data item_entity
+                            data.remove(item_entity.getUniqueId());
+                            // Remove item_entity
+                            item_entity.remove();
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+        // Break vanilla Limit Item stack (vanilla stack max: 127)
+        if (size < 32) {
+            item.getItemStack().setAmount(size);
+        } else {
+            item.getItemStack().setAmount(32);
+        }
+        // #######################################################
+        // Update Size item
+        updateItemAmount(item, size);
+
+        // Debug :: Bukkit.broadcastMessage("UUID: " + item.getUniqueId());
+    }
+
+    public String getItemName(Item entity) {
+        ItemStack itemStack = entity.getItemStack();
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta.hasDisplayName()) {
+            String ItemName = itemMeta.getDisplayName();
+            return ItemName;
+        } else {
+            String ItemName = decolor(entity.getName());
+            return ItemName;
+        }
+    }
+
+    public boolean ItemEnchantGlow(Item item) {
+        if (item.getItemStack().getType() == Material.ENCHANTED_BOOK
+                || item.getItemStack().getItemMeta().hasEnchants()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // Check Player is full inventory : ?
+    public boolean hasAvaliableSlot(Player player){
+        Inventory inv = player.getInventory();
+        for (ItemStack item : inv.getContents()) {
+            if (item == null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Reference from UltimateStacker v2.1.7
+    public void updateInventory(Item item, Inventory inventory) {
+        int amount = data.get(item.getUniqueId());
+        ItemStack itemStack = item.getItemStack();
+
+        while (amount > 0) {
+
+            int subtract = Math.min(amount, 512);
+            amount -= subtract;
+            ItemStack newItem = itemStack.clone();
+            newItem.setAmount(subtract);
+// fuck hard!!!!!!!!!!
+            Map<Integer, ItemStack> result = inventory.addItem(newItem);
+
+            if (result.get(0) != null) {
+                amount += result.get(0).getAmount();
+                break;
+            }
+        }
+
+        if (amount <= 0) {
+            data.remove(item.getUniqueId());
+            item.remove();
+        } else {
+            updateItemAmount(item, amount);
+        }
+
+    }
+
+    public HashMap<UUID, Integer> getData() {
+        return data;
+    }
+
+    public void updateItemAmount(Item item, int amount) {
+        data.put(item.getUniqueId(), amount);
+        int size = data.get(item.getUniqueId());
+        // Set CustomName entity
+        updateItemMeta(item, item.getItemStack(), size);
+    }
+
+    public void updateItemMeta(Item item, ItemStack itemStack, int amount) {
+        item.setCustomName(null);
+        String name = color("&6" + amount + "&6x" + " " + "&7" + getItemName(item));
+        item.setItemStack(itemStack);
+        item.setCustomName(name);
+        item.setCustomNameVisible(true);
+        // Set Glow if item is enchant
+        item.setGlowing(ItemEnchantGlow(item));
+    }
+
+}

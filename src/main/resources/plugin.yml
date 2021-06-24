@@ -1,0 +1,12 @@
+name: IO22
+version: ${project.version}
+main: me.pondhalf.plugin.IO22
+api-version: 1.16
+authors: [ PONDHALF ]
+commands:
+  tpa:
+    usage: /<command>
+    description: Send request teleport.
+  tpaccept:
+    usage: /<command>
+    description: Accept teleport request.
