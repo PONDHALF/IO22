@@ -45,21 +45,25 @@ public class ItemListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityPickup(EntityPickupItemEvent event) {
-        Item item = event.getItem();
-        ItemStack itemStack = item.getItemStack();
+        Item item = event.getItem(); // get event item (item pickup)
+        ItemStack itemStack = item.getItemStack(); // get ItemStack from event item
 
+        // get amount of item from data item
         int amount = data.get(item.getUniqueId());
 
+        // if entity picked up is player
         if (event.getEntity() instanceof Player) {
 
             // if (amount < (512 / 2)) return;
-            event.setCancelled(true);
-            Player player = (Player) event.getEntity();
+            event.setCancelled(true); // Cancelled the event
+            Player player = (Player) event.getEntity(); // Get player;
+            // Add some gimmick effect when pick up items
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, .2f, (float) (1 + Math.random()));
 
+            // Update item in inventory
             updateInventory(item, player.getInventory());
 
-        } else {
+        } else { // If entity picked up isn't player
 
             updateItemMeta(item, itemStack, amount - 1);
 
@@ -161,6 +165,7 @@ public class ItemListener implements Listener {
     public void onInventoryPickup(InventoryPickupItemEvent event) {
         event.setCancelled(true); // Cancel when pick items
 
+        // Update amount of item
         updateInventory(event.getItem(), event.getInventory());
     }
 
@@ -282,25 +287,38 @@ public class ItemListener implements Listener {
         // Debug :: Bukkit.broadcastMessage("UUID: " + item.getUniqueId());
     }
 
+    // Get Item entity DisplayName
     public String getItemName(Item entity) {
+        // Get ItemStack from entity(item)
         ItemStack itemStack = entity.getItemStack();
+        // Get ItemMeta from ItemStack(entity(item))
         ItemMeta itemMeta = itemStack.getItemMeta();
+
+        // If Item has DisplayName (mean name of item isn't normal) (ex: "Grass Block" -> anvil -> "Grass Block xD")
         if (itemMeta.hasDisplayName()) {
             String ItemName = itemMeta.getDisplayName();
+
             return ItemName;
-        } else {
+
+        } else { // If name of item is normal (ex: "Grass Block" -> no change anything)
             String ItemName = decolor(entity.getName());
+
             return ItemName;
         }
+
     }
 
+    // Set Item(entity) glow
     public boolean ItemEnchantGlow(Item item) {
         if (item.getItemStack().getType() == Material.ENCHANTED_BOOK
                 || item.getItemStack().getItemMeta().hasEnchants()) {
+            // if item is enchant && enchant book
             return true;
         } else {
+            // if item isn't
             return false;
         }
+
     }
 
     // Check Player is full inventory : ?
@@ -324,15 +342,33 @@ public class ItemListener implements Listener {
         // while amount greater than 0
         while (amount > 0) {
 
-            int subtract = Math.min(amount, 512);
-            amount -= subtract;
-            ItemStack newItem = itemStack.clone();
-            newItem.setAmount(subtract);
+            // ### Example int amount = 128; :: Mean amount of items on ground = 128  ###
 
+            int subtract = Math.min(amount, 512);
+            // now int subtract = 128;
+            amount -= subtract; // amount = 128(amount) - 128(subtract)
+
+            // now int amount = 0;
+
+            ItemStack newItem = itemStack.clone(); // Get clone item from (clone from pick up item);
+            newItem.setAmount(subtract); // Set amount of item clone to .... (now int subtract = 128;)
+
+            // Store amount of items(from newItem) pick up
             Map<Integer, ItemStack> result = inventory.addItem(newItem);
 
+            // Example:
+            //
+            // Now amount of newItem is equals 128
+            // If player pick up (newItem) amount 64 items
+            // So variable result equals Map.put(64, newItem) and (give player items) inventory.addItem(newItem) give items to player at the same time;
+            //
+
+            // if player can't pick up (mean amount of items pickup equals 0)
             if (result.get(0) != null) {
-                amount += result.get(0).getAmount();
+                // Now int amount = 0; right?
+                amount += result.get(0).getAmount(); // mean get amount of items can't pick up cuz inventory full or something
+                // So when update, Now int amount = amount of items can't pick up;
+                // In example: now int amount = 128(amount of items on ground) - 64(amount of items player pickup)
                 break;
             }
         }
@@ -350,23 +386,28 @@ public class ItemListener implements Listener {
 
     }
 
-    public HashMap<UUID, Integer> getData() {
-        return data;
-    }
-
+    // Update amount of items(ex: CustomName, Item data)
     public void updateItemAmount(Item item, int amount) {
+        // Put Item to Data;
         data.put(item.getUniqueId(), amount);
+        // Get amount from Item Data;
         int size = data.get(item.getUniqueId());
         // Set CustomName entity
         updateItemMeta(item, item.getItemStack(), size);
     }
 
     public void updateItemMeta(Item item, ItemStack itemStack, int amount) {
-        item.setCustomName(null);
+
+        item.setCustomName(null); // Reset CustomName of entity(item)
+
         String name = color("&6" + amount + "&6x" + " " + "&7" + getItemName(item));
-        item.setItemStack(itemStack);
-        item.setCustomName(name);
-        item.setCustomNameVisible(true);
+
+        item.setItemStack(itemStack); // no clue
+
+        item.setCustomName(name); // Set CustomName
+
+        item.setCustomNameVisible(true); // Show CustomName
+
         // Set Glow if item is enchant
         item.setGlowing(ItemEnchantGlow(item));
     }
