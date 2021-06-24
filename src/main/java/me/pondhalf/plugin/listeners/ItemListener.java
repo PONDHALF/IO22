@@ -393,8 +393,10 @@ public class ItemListener implements Listener {
     public void updateInventory(Item item, Inventory inventory) {
         int amount = data.get(item.getUniqueId());
         ItemStack itemStack = item.getItemStack();
+        ItemMeta itemMeta = itemStack.getItemMeta();
 
         ItemStack oneItem = new ItemStack(itemStack.getType(), 1);
+        oneItem.setItemMeta(itemMeta);
         // Putting them outside the while loop for re-usability, so I don't create a new variable every loop
         Map<Integer, ItemStack> leftovers;
 
@@ -435,9 +437,9 @@ public class ItemListener implements Listener {
 
         String name = color("&6" + amount + "&6x" + " " + "&7" + getItemName(item));
 
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        itemStack.setItemMeta(itemMeta);
-        // item.setItemStack(itemStack); // no clue
+//        ItemMeta itemMeta = itemStack.getItemMeta();
+//        itemStack.setItemMeta(itemMeta);
+//        item.setItemStack(itemStack); // no clue
 
         item.setCustomName(name); // Set CustomName
 
