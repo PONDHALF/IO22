@@ -257,7 +257,7 @@ public class ItemListener implements Listener {
                         // Get item_entity size
                         int ItemEntitySize = data.get(item_entity.getUniqueId());
                         // If item_entity <= 512
-                        if ((size + ItemEntitySize) <= 512) {
+                        if ((size + ItemEntitySize) <= IO22.getMaxStackSize()) {
                             // Math Calculate Size
                             size += ItemEntitySize;
                             // Remove Data item_entity
@@ -391,7 +391,13 @@ public class ItemListener implements Listener {
     // ( Fixed by ThatOneRR, He is a genius =} )
     // check it out: https://www.youtube.com/channel/UC51zMndc4X06yuXGWQk6GPA
     public void updateInventory(Item item, Inventory inventory) {
-        int amount = data.get(item.getUniqueId());
+        int amount = 0;
+
+        // Fixed NullPointException
+        if (data.get(item.getUniqueId()) != null) {
+            amount = data.get(item.getUniqueId());
+        }
+
         ItemStack itemStack = item.getItemStack();
         ItemMeta itemMeta = itemStack.getItemMeta();
 
