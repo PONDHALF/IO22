@@ -10,3 +10,7 @@ commands:
   tpaccept:
     usage: /<command>
     description: Accept teleport request.
+  io22:
+    usage: /<command>
+    description: Main command
+    permission: io22.command.reload

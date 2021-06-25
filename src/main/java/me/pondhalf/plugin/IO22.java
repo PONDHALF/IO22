@@ -1,5 +1,6 @@
 package me.pondhalf.plugin;
 
+import me.pondhalf.plugin.commands.IO22Command;
 import me.pondhalf.plugin.commands.TpaAcceptCommand;
 import me.pondhalf.plugin.commands.TpaCommand;
 import me.pondhalf.plugin.components.TpaPlayer;
@@ -39,9 +40,15 @@ public final class IO22 extends JavaPlugin {
 
     private ItemListener itemListener;
 
+    private static int MAX_STACK_SIZE;
+
     @Override
     public void onEnable() {
         // Plugin startup logic
+        this.saveDefaultConfig();
+
+        MAX_STACK_SIZE = this.getConfig().getInt("Items.max_stack_size");
+
         logger = getServer().getLogger();
         teleportPaper = new TeleportPaper(this);
         teleportPaperRecipe = new TeleportPaperRecipe(this);
@@ -58,6 +65,7 @@ public final class IO22 extends JavaPlugin {
 
         this.getCommand("tpa").setExecutor(new TpaCommand(this));
         this.getCommand("tpaccept").setExecutor(new TpaAcceptCommand(this));
+        this.getCommand("io22").setExecutor(new IO22Command(this));
 
         addDataItems();
 
@@ -123,6 +131,14 @@ public final class IO22 extends JavaPlugin {
 
     public static Logger getPluginLogger() {
         return logger;
+    }
+
+    public static int getMaxStackSize() {
+        return MAX_STACK_SIZE;
+    }
+
+    public static void setMaxStackSize(int maxStackSize) {
+        MAX_STACK_SIZE = maxStackSize;
     }
 
     public TeleportPaper getTeleportPaper() {
