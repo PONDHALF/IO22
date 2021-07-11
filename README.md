@@ -3,7 +3,7 @@ Simple Items Stacking
 Using Spigot version 1.17
 
 Features:
-- DamageIndicators
+- Damage Indicators
 - Simple OnGround Items Stacking
 - Teleport Paper
 - Waypoint onDeath (Broadcast message position when death) 
