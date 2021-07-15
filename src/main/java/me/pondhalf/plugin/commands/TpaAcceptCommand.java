@@ -10,8 +10,8 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 
-import static me.pondhalf.plugin.utils.color;
-import static me.pondhalf.plugin.utils.log;
+import static me.pondhalf.plugin.Utils.color;
+import static me.pondhalf.plugin.Utils.log;
 
 public class TpaAcceptCommand implements CommandExecutor {
 
@@ -42,12 +42,12 @@ public class TpaAcceptCommand implements CommandExecutor {
                     whoTpa.sendTitle(color("&a&lTeleport.."),"",1,5,1);
                     tpa.remove(player);
                 } else {
-                    player.sendMessage(color("&b&lCUPID &fไม่พบผู้เล่นดังกล่าว!"));
+                    player.sendMessage(color("&b&IO22 &fไม่พบผู้เล่นดังกล่าว!"));
                     player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1,1);
                     tpa.remove(player);
                 }
             } else {
-                player.sendMessage(color("&b&lCUPID &fยังไม่มีใคร tpa มาหาคุณ!"));
+                player.sendMessage(color("&b&lIO22 &fยังไม่มีใคร tpa มาหาคุณ!"));
                 player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1,1);
             }
         }

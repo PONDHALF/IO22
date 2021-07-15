@@ -14,3 +14,19 @@ commands:
     usage: /<command>
     description: Main command
     permission: io22.command.reload
+  dev:
+    usage: /<command>
+    description: Developer command
+    permission: io22.command.dev
+  home:
+    usage: /<command>
+    description: teleport to home command
+  sethome:
+    usage: /<command>
+    description: Set home command
+  back:
+    usage: /<command>
+    description: Return player to death waypoint
+  creative:
+    usage: /<command>
+    description: Go to creative world

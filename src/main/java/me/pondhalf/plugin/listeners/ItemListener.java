@@ -1,6 +1,8 @@
 package me.pondhalf.plugin.listeners;
 
 import me.pondhalf.plugin.IO22;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -9,27 +11,27 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.entity.ItemMergeEvent;
-import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static me.pondhalf.plugin.utils.color;
-import static me.pondhalf.plugin.utils.decolor;
+import static me.pondhalf.plugin.Utils.color;
+import static me.pondhalf.plugin.Utils.decolor;
 
 public class ItemListener implements Listener {
 // *******##### So Hard!!! Started 22/6/2564 Time: 20:24 #####*******
     private IO22 plugin;
 
-    private HashMap<UUID, Integer> data;
+    public HashMap<UUID, Integer> data;
 
     public ItemListener(IO22 plugin) {
         this.plugin = plugin;
@@ -40,6 +42,25 @@ public class ItemListener implements Listener {
     @EventHandler
     public void onItemMerge(ItemMergeEvent event) {
         event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onItemDamage(EntityDamageEvent event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof Item) {
+            Item item = (Item) event.getEntity();
+            data.remove(item.getUniqueId());
+            item.remove();
+        }
+    }
+
+    @EventHandler
+    public void onItemDespawn(ItemDespawnEvent event) {
+        Item item = event.getEntity();
+        UUID uuid = item.getUniqueId();
+        if (data.containsKey(uuid)) {
+            data.remove(uuid);
+        }
     }
 
 
@@ -57,11 +78,9 @@ public class ItemListener implements Listener {
             // if (amount < (512 / 2)) return;
             event.setCancelled(true); // Cancelled the event
             Player player = (Player) event.getEntity(); // Get player;
-            // Add some gimmick effect when pick up items
-            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, .2f, (float) (1 + Math.random()));
 
             // Update item in inventory
-            updateInventory(item, player.getInventory());
+            updateInventory(item, player.getInventory(), player);
 
         } else { // If entity picked up isn't player
 
@@ -253,7 +272,11 @@ public class ItemListener implements Listener {
 
                     // Check ItemMetaData
                     if (itemStack.isSimilar(itemStack_ent)
-                    || itemStack.getItemMeta().getItemFlags() == itemStack_ent.getItemMeta().getItemFlags()) {
+                            || itemStack.getItemMeta().getItemFlags() == itemStack_ent.getItemMeta().getItemFlags()) {
+
+                        // Fixed Return null
+                        if (data.get(item_entity.getUniqueId()) == null) return;
+
                         // Get item_entity size
                         int ItemEntitySize = data.get(item_entity.getUniqueId());
                         // If item_entity <= 512
@@ -264,7 +287,6 @@ public class ItemListener implements Listener {
                             data.remove(item_entity.getUniqueId());
                             // Remove item_entity
                             item_entity.remove();
-
                         }
 
                     }
@@ -272,8 +294,9 @@ public class ItemListener implements Listener {
                 }
 
             }
-
         }
+
+
         // Break vanilla Limit Item stack (vanilla item drop stack max: 127)
         if (size < 32) {
             item.getItemStack().setAmount(size);
@@ -394,9 +417,9 @@ public class ItemListener implements Listener {
         int amount = 0;
 
         // Fixed NullPointException
-        if (data.get(item.getUniqueId()) != null) {
-            amount = data.get(item.getUniqueId());
-        }
+        if (data.get(item.getUniqueId()) == null) return;
+
+        amount = data.get(item.getUniqueId());
 
         ItemStack itemStack = item.getItemStack();
         ItemMeta itemMeta = itemStack.getItemMeta();
@@ -427,6 +450,50 @@ public class ItemListener implements Listener {
 
     }
 
+    public void updateInventory(Item item, Inventory inventory, Player player) {
+        int amount = 0;
+
+        // Fixed NullPointException
+        if (data.get(item.getUniqueId()) == null) return;
+
+        amount = data.get(item.getUniqueId());
+
+        final int amt = amount;
+
+        ItemStack itemStack = item.getItemStack();
+        ItemMeta itemMeta = itemStack.getItemMeta();
+
+        ItemStack oneItem = new ItemStack(itemStack.getType(), 1);
+        oneItem.setItemMeta(itemMeta);
+        // Putting them outside the while loop for re-usability, so I don't create a new variable every loop
+        Map<Integer, ItemStack> leftovers;
+
+        while (amount > 0) {
+            // Add item (1 each loop). Let Minecraft handle the item stacking =D
+            leftovers = inventory.addItem(oneItem);
+
+            // If there are leftovers, it means the inventory is full! Stop adding items :O
+            if (!leftovers.isEmpty()) break;
+            // If not, it means 1 item is added successfully! Let's count the amount down and let the loop run again
+            amount --;
+
+            if (amount == amt) return;
+            // Add some gimmick effect when pick up items
+            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, .2f, (float) (1 + Math.random()));
+        }
+
+        if (amount <= 0) {
+            // Remove items from data;
+            data.remove(item.getUniqueId());
+            // Kill entity (item)
+            item.remove();
+        } else {
+            // Update amount of items onGround
+            updateItemAmount(item, amount);
+        }
+
+    }
+
     // Update amount of items(ex: CustomName, Item data)
     public void updateItemAmount(Item item, int amount) {
         // Put Item to Data;
@@ -441,7 +508,15 @@ public class ItemListener implements Listener {
 
         item.setCustomName(null); // Reset CustomName of entity(item)
 
-        String name = color("&6" + amount + "&6x" + " " + "&7" + getItemName(item));
+        String name;
+
+
+        if (amount > 64) {
+            name = ChatColor.YELLOW + "▶" + " " + ChatColor.of(new Color(245, 66, 65)) + String.valueOf(amount) + "x" + " " + color("&7" + getItemName(item));
+        } else {
+            name = ChatColor.YELLOW + "▶" + " " + ChatColor.of(new Color(235, 52, 88)) + String.valueOf(amount) + "x" + " " + color("&7" + getItemName(item));
+        }
+
 
 //        ItemMeta itemMeta = itemStack.getItemMeta();
 //        itemStack.setItemMeta(itemMeta);

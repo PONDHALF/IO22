@@ -1,7 +1,6 @@
 package me.pondhalf.plugin.gui;
 
 import me.pondhalf.plugin.IO22;
-import me.pondhalf.plugin.utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -12,7 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static me.pondhalf.plugin.utils.color;
+import static me.pondhalf.plugin.Utils.color;
 
 public class TeleportGUI {
 

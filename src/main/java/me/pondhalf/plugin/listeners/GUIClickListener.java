@@ -10,11 +10,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import static me.pondhalf.plugin.utils.color;
-import static me.pondhalf.plugin.utils.decolor;
+import static me.pondhalf.plugin.Utils.color;
+import static me.pondhalf.plugin.Utils.decolor;
 
 public class GUIClickListener implements Listener {
 

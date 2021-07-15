@@ -9,7 +9,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
 
-import static me.pondhalf.plugin.utils.color;
+import static me.pondhalf.plugin.Utils.color;
 
 public class TeleportPaper {
 

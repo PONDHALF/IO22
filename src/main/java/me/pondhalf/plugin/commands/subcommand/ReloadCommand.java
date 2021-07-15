@@ -5,7 +5,7 @@ import me.pondhalf.plugin.commands.SubCommand;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-import static me.pondhalf.plugin.utils.color;
+import static me.pondhalf.plugin.Utils.color;
 
 public class ReloadCommand extends SubCommand {
 
