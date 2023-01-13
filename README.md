@@ -1,5 +1,5 @@
 # IO22 Plugin 
-Simple Items Stacking
+Plugin for IO22 Server
 Using Spigot version 1.17
 
 Features:
